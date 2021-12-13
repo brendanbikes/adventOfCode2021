@@ -17,9 +17,6 @@ def readInput():
 	return map
 
 def recur(map, root, currentPath=[], paths=[]):
-	if root == 'start':
-		currentPath = []
-
 	#append current node
 	currentPath.append(root)
 
@@ -37,9 +34,6 @@ def recur(map, root, currentPath=[], paths=[]):
 	return paths
 
 def recur2(map, root, currentPath=[], paths=[]):
-	if root == 'start':
-		currentPath = []
-
 	#append current node
 	currentPath.append(root)
 

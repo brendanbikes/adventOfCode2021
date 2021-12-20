@@ -25,27 +25,26 @@ def readInput():
 
 	return data[0]
 
-def parsePackets(stream, packets=[], versionSum=0, M=10000000000):
-	#set M to some arbitrarily high value
+def parsePackets(stream, packetTypeIDs=[], packetVersions=[], literals=[], versionSum=0, N=10000000, M=10000000000):
+	#set N,M to some arbitrarily high value
 	#num of parsed packets for this level
+	#stream is the remaining stream left to parse
 	m=0
 
 	print('\nstarting parsing function')
-	print(len(stream), m, M)
-	print('length', len(stream))
-	print('\n')
 
-	while len(stream) >= 6 and m <= M: #stream must at least contain 7 bits to still be valid
-		#thisPacket = stream[0:6]
+	while len(stream) >= 11 and m <= M: #stream must at least contain 11 bits to be a valid packet - literal packets are the shortest possible
 		version = int(stream[0:3],2)
 		typeID = int(stream[3:6],2)
+		packetVersions.append(version)
+		packetTypeIDs.append(typeID)
 		versionSum+=version
-		print(version,typeID)
+		print('Packet version {}, type {}'.format(version,typeID))
 
 		if typeID == 4:
 			#literal packet
 			#get groups of 5 where first value is a 1, until a group of 5 prefixed by a 0 is reached
-			print('literal')
+			print('literal packet')
 			f=1
 			i=0
 			numstr=''
@@ -56,16 +55,18 @@ def parsePackets(stream, packets=[], versionSum=0, M=10000000000):
 				i+=5
 
 			num = int(numstr,2)
-			packets.append(num)
+			print(num)
+			literals.append(num)
 			m+=1
 
 			#truncate stream
 			stream = stream[6+(i):]
+			#print('Stream is now reduced to {}'.format(len(stream)))
 
 		else:
 			#operator packet
-			print('operator')
 			lengthTypeID = int(stream[6])
+			print('Operator packet with length type {}'.format(lengthTypeID))
 
 			if lengthTypeID == 0:
 				#next 15 bits are a number that represents total length in bits of the sub-packets contained by this packet
@@ -73,7 +74,8 @@ def parsePackets(stream, packets=[], versionSum=0, M=10000000000):
 				m+=1
 				print(stream[7+15:7+15+n])
 
-				packets, versionSum, junk = parsePackets(stream[7+15:7+15+n], packets, versionSum)
+				print('recur')
+				packetTypeIDs, packetVersions, literals, versionSum, junk, junk = parsePackets(stream[7+15:7+15+n], packetTypeIDs=packetTypeIDs, packetVersions=packetVersions, literals=[], versionSum=versionSum)
 				stream = stream[7+15+n:]
 
 			elif lengthTypeID == 1:
@@ -82,26 +84,17 @@ def parsePackets(stream, packets=[], versionSum=0, M=10000000000):
 				print('M', M)
 				m+=1
 
-				packets, versionSum, stream = parsePackets(stream[7+11:], packets, versionSum, M)
+				print('recur')
+				packetTypeIDs, packetVersions, literals, versionSum, stream, junk = parsePackets(stream[7+11:], packetTypeIDs=packetTypeIDs, packetVersions=packetVersions, literals=[], versionSum=versionSum, M=M)
 
-		print('end of while loop')
-		print('\nlength', len(stream))
-
-
-	#print('outside while loop')
-
-
-
-
-	return packets, versionSum, stream
-
-
+	return packetTypeIDs, packetVersions, literals, versionSum, stream, m
 
 
 
 def part1():
 	#read in hexadecimal
 	data = readInput()
+	data = '620080001611562C8802118E34'
 
 	binary = ''
 	for x in data:
@@ -109,9 +102,18 @@ def part1():
 
 	print(binary)
 
-	packets, versionSum, stream = parsePackets(binary)
+	#binary = ''
 
-	print(packets, versionSum)
+	print('Stream initial length is {}'.format(len(binary)))
+
+	packetTypeIDs, packetVersions, literals, versionSum, stream, m = parsePackets(binary)
+
+	print('\nVersion sum')
+	print(versionSum)
+	print('Packet Type IDs')
+	print(packetTypeIDs)
+	print('Packet versions')
+	print(packetVersions)
 
 
 def part2():

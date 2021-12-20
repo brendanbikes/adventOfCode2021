@@ -87,6 +87,7 @@ def parsePacketsPart2(stream, parentTypeID=-1, packetTypeIDs=[], packetVersions=
 	v=0
 	#literals=[]
 	print('recur')
+	print(literals)
 
 	while len(stream) >= 11 and m <= M: #stream must at least contain 11 bits to be a valid packet - literal packets are the shortest possible
 		version = int(stream[0:3],2)
@@ -111,7 +112,6 @@ def parsePacketsPart2(stream, parentTypeID=-1, packetTypeIDs=[], packetVersions=
 				i+=5
 
 			num = int(numstr,2)
-			print(num)
 			literals.append(num)
 
 			#truncate stream
@@ -122,7 +122,7 @@ def parsePacketsPart2(stream, parentTypeID=-1, packetTypeIDs=[], packetVersions=
 			#operator packet
 			print('\noperator')
 			lengthTypeID = int(stream[6])
-			vals = []
+			#literals=[]
 			print('next operator packet')
 			print('literals', literals)
 			if lengthTypeID == 0:
@@ -133,7 +133,7 @@ def parsePacketsPart2(stream, parentTypeID=-1, packetTypeIDs=[], packetVersions=
 				packetTypeIDs, packetVersions, v, versionSum, junk, junk, M = parsePacketsPart2(stream[7+15:7+15+n], parentTypeID=typeID, packetTypeIDs=packetTypeIDs, packetVersions=packetVersions, literals=[], versionSum=versionSum)
 				stream = stream[7+15+n:]
 				print('v1', v)
-				vals.append(v)
+				literals.append(v)
 				print('literals1', literals)
 
 			elif lengthTypeID == 1:
@@ -143,18 +143,12 @@ def parsePacketsPart2(stream, parentTypeID=-1, packetTypeIDs=[], packetVersions=
 				packetTypeIDs, packetVersions, v, versionSum, stream, junk, M = parsePacketsPart2(stream[7+11:], parentTypeID=typeID, packetTypeIDs=packetTypeIDs, packetVersions=packetVersions, literals=[], versionSum=versionSum, M=M)
 				print(literals)
 				print('v2', v)
-				vals.append(v)
+				literals.append(v)
 				print('literals2', literals)
 
 	#evaluate the operator packet values
 
 	print('\nevaluating the literals', literals)
-
-	try:
-		if vals:
-			literals = vals[:]
-	except UnboundLocalError:
-		pass
 
 	if parentTypeID == 0:
 		print('test')

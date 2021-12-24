@@ -103,7 +103,6 @@ def computeSum(num):
 	depths = list(range(1,5))
 	depths.reverse()
 	for d in depths:
-		print('checking depth {}'.format(d))
 		while d in [x[1] for x in num]:
 			#sum the leftmost pair, replace with single number of 1 less depth
 			#the sum is 3x the left value + 2x the right value
@@ -114,8 +113,6 @@ def computeSum(num):
 				i+=1
 
 			#i is index of leftmost deepest pair - replace this pair with a number equal to the sum, at 1 less depth
-			print(num)
-			print(i)
 			z = (3*num[i][0]+2*num[i+1][0],d-1)
 			#restructure list
 			try:
@@ -129,11 +126,8 @@ def part1():
 	#add up all the snailfish numbers and reduce them after each addition
 	data = readInput()
 
-	print(data[0])
-
 	num = reduce(flatten(data[0]))
 
-	print(num)
 
 	for num2 in data[1:]:
 		#add num2 to existing number by forming another outside pair
@@ -141,8 +135,6 @@ def part1():
 		#one appended, reduce the existing number
 		num = increaseDepth(num) + increaseDepth(reduce(flatten(num2)))
 		num = reduce(num)
-
-	print(num)
 
 	#should have a final output here - now, compute the final sum - each pair is summed together recursisely to yield 1 number
 	#a fully reduced number will not have any numbers at number-depth 5 - so we only need to work with depths 0-4 in reverse
